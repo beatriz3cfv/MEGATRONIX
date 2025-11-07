@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #define TAM_LINEA 8
+#define TAM_RAM 4096
 
 typedef struct {
     unsigned char ETQ;
@@ -17,7 +18,7 @@ void TratarFallo(T_CACHE_LINE *tbl, char *MRAM, int ETQ, int linea, int bloque);
 int main(){
     // Inicializar datos
     int globaltime = 0, numfallos = 0;
-    unsigned char Simul_RAM[4096];
+    unsigned char Simul_RAM[TAM_RAM];
 
     T_CACHE_LINE struct_lineas_cache[TAM_LINEA];
 
@@ -35,7 +36,26 @@ int main(){
         }
     }
 
-    // Abrir ficheros
+    // Abrir fichero Binario y guardarlo en Simul_RAM
+    FILE *fBin = fopen("/MEGATRONIX/CONTENTS_RAM.bin", "rb");
+
+    if(fBin == NULL){
+        printf("Ha ocurrido un error al intentar abrir el fichero binario");
+    }
+
+    size_t fread(Simul_RAM, sizeof(unsigned char), TAM_RAM, fBin); //aqui da un error :)
+    int fclose(FILE *fBin);
+
+    //Abrir fichero de texto
+    FILE *fTxt = fopen("dirs_memoria.txt", "r");
+
+    if(fTxt == NULL){
+        printf("Ha ocurrido un error al intentar abrir el fichero de texto");
+    }
+
+    //char *fgets(char *str, int n, FILE *stream)
+
+    int fclose(FILE *fTxt);
 }
 
 // void LimpiarCACHE(T_CACHE_LINE tbl[NUM_FILAS]){}
