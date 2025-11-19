@@ -43,8 +43,8 @@ int main(){
         printf("Ha ocurrido un error al intentar abrir el fichero binario");
     }
 
-    size_t fread(Simul_RAM, sizeof(unsigned char), TAM_RAM, fBin); //aqui da un error :)
-    int fclose(FILE *fBin);
+    size_t lineasLeidas = fread(Simul_RAM, sizeof(unsigned char), TAM_RAM, fBin); 
+    fclose(fBin);
 
     //Abrir fichero de texto
     FILE *fTxt = fopen("dirs_memoria.txt", "r");
@@ -55,7 +55,7 @@ int main(){
 
     //char *fgets(char *str, int n, FILE *stream)
 
-    int fclose(FILE *fTxt);
+    fclose(fTxt);
 }
 
 // void LimpiarCACHE(T_CACHE_LINE tbl[NUM_FILAS]){}
