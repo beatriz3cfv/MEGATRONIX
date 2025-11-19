@@ -46,7 +46,6 @@ int main(){
     FILE *fBin = fopen("accesos_memoria_y CONTENTS_RAM/CONTENTS_RAM.bin", "rb");
 
     if(fBin == NULL){
-        perror("Error al abrir el binario");
         printf("Ha ocurrido un error al intentar abrir el fichero binario\n");
         return -1;
     }
