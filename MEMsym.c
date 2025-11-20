@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #define TAM_LINEA 8
 #define TAM_RAM 4096
@@ -10,7 +11,7 @@ typedef struct {
 } T_CACHE_LINE;
 
 // Funciones
-// void LimpiarCACHE(T_CACHE_LINE tbl[NUM_FILAS]);
+void LimpiarCACHE(T_CACHE_LINE tbl[TAM_LINEA]);
 void VolcarCACHE(T_CACHE_LINE *tbl);
 void ParsearDireccion(unsigned int addr, int *ETQ, int *palabra, int *linea, int *bloque);
 void TratarFallo(T_CACHE_LINE *tbl, char *MRAM, int ETQ, int linea, int bloque);
@@ -24,20 +25,16 @@ int main(){
     int ETQ = 0, bloque = 0, linea = 0, palabra = 0;
     unsigned int hex = 0;
     int hit = 0;
+    char texto[100];
+    int accesos = 0;
 
     T_CACHE_LINE tbl[TAM_LINEA]; //el puso tbl en la practica, es pa no liarnos
-
-    for (int i = 0; i < TAM_LINEA; i++) {
-        tbl[i].ETQ = 0xFF;
-        for (int j = 0; j < TAM_LINEA; j++) {
-            tbl[i].Data[j] = 0x23;
-        }
-    }
+    LimpiarCACHE(tbl);
 
     /*for (int i = 0; i < TAM_LINEA; i++) {
-        printf("ETQ: %02X\n", struct_lineas_cache[i].ETQ);
+        printf("ETQ: %02X\n", tbl[i].ETQ);
         for (int j = 0; j < TAM_LINEA; j++) {
-            printf("%02X\n", struct_lineas_cache[i].Data[j]);
+            printf("%02X\n", tbl[i].Data[j]);
         }
     }*/
 
@@ -63,38 +60,48 @@ int main(){
     //leer cada linea del fichero de direcciones de memoria
     while(fgets(lineaMem, sizeof(lineaMem), fTxt)){
         globaltime++;
+        accesos++;
         //printf("%s", lineaMem);
 
-        //AQUI HAY MONTON D ERRORES PQ HAY Q CAMBIAR LINEAMEM A UN HEX
         hex = (unsigned long) strtol(lineaMem, NULL, 16);
-
         ParsearDireccion(hex, &ETQ, &palabra, &linea, &bloque);
 
-        //printf("direccion: %0X, etq: %d, linea: %d, palabra: %d\n", hex, ETQ, linea, palabra);
-
-
+        //printf("direccion: %0X, etq: %d, linea: %d, palabra: %d, bloque: %d\n", hex, ETQ, linea, palabra, bloque);
         //CUIDADO BUCLE INFINITO
-
+        
         while(hit == 0){
             if(tbl[linea].ETQ == ETQ){
                 hit++;
+                printf("T: %d, Acierto de CACHE, ADDR %04X Label %X linea %02X palabra %02X DATO %02X\n", globaltime, hex, ETQ, linea, palabra, tbl[linea].Data[palabra]);
+                //añadir a texto
             }else{
-
                 numfallos++;
                 printf("T: %d, Fallo de CACHE %d, ADDR %04X Label %X linea %02X palabra %02X bloque %02X\n", globaltime, numfallos, hex, ETQ, linea, palabra, bloque);
                 globaltime += 20;
 
+                printf("Cargando el bloque %d en la linea %d", bloque, linea);
                 TratarFallo(tbl, Simul_RAM, ETQ, linea, bloque);
             }
         }
     }
 
     fclose(fTxt);
+
+    sleep(1);
+    printf("Accesos totales: %d; Fallos: %d; Tiempo medio: %.2f", accesos, numfallos, (float) globaltime/accesos);
+    
+    //Debajo, otro mensaje con el texto leído carácter a carácter desde la caché
+    //llamar a volcarCache
 }
 
-/*void LimpiarCACHE(T_CACHE_LINE tbl[NUM_FILAS]){
-    //aqui es donde se inicializa la cache
-}*/
+void LimpiarCACHE(T_CACHE_LINE tbl[TAM_LINEA]){
+    for (int i = 0; i < TAM_LINEA; i++) {
+        tbl[i].ETQ = 0xFF;
+        for (int j = 0; j < TAM_LINEA; j++) {
+            tbl[i].Data[j] = 0x23;
+        }
+    }
+}
 
 
 void VolcarCACHE(T_CACHE_LINE *tbl) {
@@ -106,10 +113,10 @@ void ParsearDireccion(unsigned int addr, int *ETQ, int *palabra, int *linea, int
     *linea = (addr >> 4) & 0x7; //0x7 -> 111, 3 bits; lo de lineaMem >> 4 'quita' los ultimos 4 bits (los q leimos para palabra), ahora lo q lee seran los nuevos ultimos bits -> linea
     *ETQ = (addr >> 7) & 0x1F; //0x1F -> 16 -> 1 1111, 5 bits
 
-    //bloque???
+    *bloque = (addr >> 4) & 0xFF; //el bloque será (creo) la etiqueta mas la linea
 }
 
 void TratarFallo(T_CACHE_LINE *tbl, char *MRAM, int ETQ, int linea, int bloque) {
-    //esto aun no tengo ni idea, es un intento de entender que es cada cosa. se que el numfallos va fuera, es para acordarse de hacerlo
+    //aqui hay q cargar el bloque en la linea correcta
 
 }
