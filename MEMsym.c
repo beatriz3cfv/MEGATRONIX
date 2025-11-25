@@ -21,11 +21,11 @@ int main(){
     // Inicializar datos
     int globaltime = 0, numfallos = 0, hit = 0, accesos = 0;
     int ETQ = 0, bloque = 0, linea = 0, palabra = 0;
+    int itexto = 0;
     unsigned char Simul_RAM[TAM_RAM];
     unsigned int hex = 0;
     char lineaMem[256];
     char texto[100];
-    int itexto = 0;
 
     T_CACHE_LINE tbl[TAM_LINEA]; //el puso tbl en la practica, es pa no liarnos
     LimpiarCACHE(tbl);
@@ -68,30 +68,30 @@ int main(){
         //printf("direccion: %0X, etq: %d, linea: %d, palabra: %d, bloque: %d\n", hex, ETQ, linea, palabra, bloque);
         //CUIDADO BUCLE INFINITO
         
-        while(hit == 0){
-            if(tbl[linea].ETQ == ETQ){
-                hit++;
-                printf("T: %d, Acierto de CACHE, ADDR %04X Label %X linea %02X palabra %02X DATO %02X\n", globaltime, hex, ETQ, linea, palabra, tbl[linea].Data[palabra]);
-                //añadir a texto
-            }else{
-                globaltime += 20;
-                numfallos++;
-                printf("T: %d, Fallo de CACHE %d, ADDR %04X Label %X linea %02X palabra %02X bloque %02X\n", globaltime, numfallos, hex, ETQ, linea, palabra, bloque);
+    if(tbl[linea].ETQ == ETQ){
+            hit++;
+            printf("T: %d, Acierto de CACHE, ADDR %04X Label %X linea %02X palabra %02X DATO %02X\n", globaltime, hex, ETQ, linea, palabra, tbl[linea].Data[palabra]);
+            //añadir a texto
+        } else {
+            globaltime += 20;
+            numfallos++;
+            printf("T: %d, Fallo de CACHE %d, ADDR %04X Label %X linea %02X palabra %02X bloque %02X\n", globaltime, numfallos, hex, ETQ, linea, palabra, bloque);
 
-                printf("Cargando el bloque %X en la linea %02X\n", bloque, linea);
-                TratarFallo(tbl, Simul_RAM, ETQ, linea, bloque);
+            printf("Cargando el bloque %X en la linea %02X\n", bloque, linea);
+            TratarFallo(tbl, Simul_RAM, ETQ, linea, bloque);
 
-                printf("T: %d, Acierto de CACHE, ADDR %04X Label %X linea %02X palabra %02X DATO %02X\n", globaltime, hex, ETQ, linea, palabra, tbl[linea].Data[palabra]);
-            }
+            printf("T: %d, Acierto de CACHE, ADDR %04X Label %X linea %02X palabra %02X DATO %02X\n", globaltime, hex, ETQ, linea, palabra, tbl[linea].Data[palabra]);
+        }
 
-            if (itexto < 100) {
-                texto[itexto++] = tbl[linea].Data[palabra];
-                texto[itexto] = '\0';
-            }
+        if (itexto < 100) {
+            texto[itexto++] = tbl[linea].Data[palabra];
+            texto[itexto] = '\0';
         }
     }
 
     fclose(fTxt);
+
+    VolcarCACHE(tbl);
 
     sleep(1);
     printf("Accesos totales: %d; Fallos: %d; Tiempo medio: %.2f \n", accesos, numfallos, (float) globaltime/accesos);
@@ -99,32 +99,27 @@ int main(){
     //Debajo, otro mensaje con el texto leído carácter a carácter desde la caché
     printf("Texto leído: %s \n", texto);
     
-    //llamar a volcarCache
-    VolcarCACHE(tbl);
-    
-    // poner la cache en el fichero
+    // Volcar la caché en el fichero .bin
+    FILE *fConBin = fopen("accesos_memoria_y CONTENTS_RAM/CONTENTS_CACHE.bin", "wb");
+    if(fBin == NULL){
+        printf("Ha ocurrido un error al intentar abrir el fichero binario\n");
+        return -1;
+    }
+    for (int i = 0; i < 8; i++) { // 8 lineas
+        fwrite(tbl[i].Data, sizeof(unsigned char), TAM_LINEA, fConBin);
+    }
+
+    fclose(fConBin);
     return 0;
 }
 
 void LimpiarCACHE(T_CACHE_LINE tbl[TAM_LINEA]){
-    for (int i = 0; i < TAM_LINEA; i++) {
+    for (int i = 0; i < 8; i++) { // antes estaba TAM_LINEA
         tbl[i].ETQ = 0xFF;
         for (int j = 0; j < TAM_LINEA; j++) {
             tbl[i].Data[j] = 0x23;
         }
     }
-}
-
-
-void VolcarCACHE(T_CACHE_LINE *tbl) {
-    for (int i; i < 8; i++) {
-        printf("Línea: %02X ETQ: %02X Datos: ", i, tbl[i].ETQ );
-
-        for (int j = TAM_LINEA - 1; j >= 0; j--) { // de mayor a menor
-            printf("%02X", tbl[i].Data[j]);
-        }
-        printf("\n");
-    } 
 }
 
 void ParsearDireccion(unsigned int addr, int *ETQ, int *palabra, int *linea, int *bloque) {
@@ -134,6 +129,18 @@ void ParsearDireccion(unsigned int addr, int *ETQ, int *palabra, int *linea, int
 
     *bloque = (addr >> 4) & 0xFF; //el bloque será (creo) la etiqueta mas la linea
 }
+
+void VolcarCACHE(T_CACHE_LINE *tbl) {
+    for (int i = 0; i < 8; i++) { // 8 lineas
+        printf("%02X   Datos: ", tbl[i].ETQ);
+
+        for (int j = TAM_LINEA - 1; j >= 0; j--) { // de mayor a menor
+            printf("%02X ", tbl[i].Data[j]);
+        }
+        printf("\n");
+    } 
+}
+
 
 void TratarFallo(T_CACHE_LINE *tbl, char *MRAM, int ETQ, int linea, int bloque) {
     int direccion_inicio_RAM = bloque * TAM_LINEA;
