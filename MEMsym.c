@@ -73,9 +73,9 @@ int main(){
             printf("T: %d, Acierto de CACHE, ADDR %04X Label %X linea %02X palabra %02X DATO %02X\n", globaltime, hex, ETQ, linea, palabra, tbl[linea].Data[palabra]);
             //añadir a texto
         } else {
-            globaltime += 20;
             numfallos++;
             printf("T: %d, Fallo de CACHE %d, ADDR %04X Label %X linea %02X palabra %02X bloque %02X\n", globaltime, numfallos, hex, ETQ, linea, palabra, bloque);
+            globaltime += 20;
 
             printf("Cargando el bloque %X en la linea %02X\n", bloque, linea);
             TratarFallo(tbl, Simul_RAM, ETQ, linea, bloque);
