@@ -21,21 +21,14 @@ int main(){
     // Inicializar datos
     int globaltime = 0, numfallos = 0, hit = 0, accesos = 0;
     int ETQ = 0, bloque = 0, linea = 0, palabra = 0;
-    int itexto = 0;
+    int itexto = 0; // index de caracteres dentro del texto
     unsigned char Simul_RAM[TAM_RAM];
     unsigned int hex = 0;
     char lineaMem[256];
     char texto[100];
 
-    T_CACHE_LINE tbl[TAM_LINEA]; //el puso tbl en la practica, es pa no liarnos
+    T_CACHE_LINE tbl[TAM_LINEA];
     LimpiarCACHE(tbl);
-
-    /*for (int i = 0; i < TAM_LINEA; i++) {
-        printf("ETQ: %02X\n", tbl[i].ETQ);
-        for (int j = 0; j < TAM_LINEA; j++) {
-            printf("%02X\n", tbl[i].Data[j]);
-        }
-    }*/
 
     // Abrir fichero Binario y guardarlo en Simul_RAM
     FILE *fBin = fopen("accesos_memoria_y CONTENTS_RAM/CONTENTS_RAM.bin", "rb");
@@ -66,12 +59,11 @@ int main(){
         ParsearDireccion(hex, &ETQ, &palabra, &linea, &bloque);
 
         //printf("direccion: %0X, etq: %d, linea: %d, palabra: %d, bloque: %d\n", hex, ETQ, linea, palabra, bloque);
-        //CUIDADO BUCLE INFINITO
         
     if(tbl[linea].ETQ == ETQ){
-            hit++;
+            // hit++;
             printf("T: %d, Acierto de CACHE, ADDR %04X Label %X linea %02X palabra %02X DATO %02X\n", globaltime, hex, ETQ, linea, palabra, tbl[linea].Data[palabra]);
-            //añadir a texto
+            
         } else {
             numfallos++;
             printf("T: %d, Fallo de CACHE %d, ADDR %04X Label %X linea %02X palabra %02X bloque %02X\n", globaltime, numfallos, hex, ETQ, linea, palabra, bloque);
@@ -114,7 +106,7 @@ int main(){
 }
 
 void LimpiarCACHE(T_CACHE_LINE tbl[TAM_LINEA]){
-    for (int i = 0; i < 8; i++) { // antes estaba TAM_LINEA
+    for (int i = 0; i < 8; i++) { // numero de lineas
         tbl[i].ETQ = 0xFF;
         for (int j = 0; j < TAM_LINEA; j++) {
             tbl[i].Data[j] = 0x23;
@@ -140,7 +132,6 @@ void VolcarCACHE(T_CACHE_LINE *tbl) {
         printf("\n");
     } 
 }
-
 
 void TratarFallo(T_CACHE_LINE *tbl, char *MRAM, int ETQ, int linea, int bloque) {
     int direccion_inicio_RAM = bloque * TAM_LINEA;
