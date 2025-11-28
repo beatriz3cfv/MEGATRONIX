@@ -79,11 +79,13 @@ int main(){
             texto[itexto++] = tbl[linea].Data[palabra];
             texto[itexto] = '\0';
         }
+        VolcarCACHE(tbl);
+        printf("\n");
     }
 
     fclose(fTxt);
 
-    VolcarCACHE(tbl);
+    // VolcarCACHE(tbl);
 
     sleep(1);
     printf("Accesos totales: %d; Fallos: %d; Tiempo medio: %.2f \n", accesos, numfallos, (float) globaltime/accesos);
