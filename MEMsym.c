@@ -60,7 +60,7 @@ int main(){
 
         //printf("direccion: %0X, etq: %d, linea: %d, palabra: %d, bloque: %d\n", hex, ETQ, linea, palabra, bloque);
         
-    if(tbl[linea].ETQ == ETQ){
+        if(tbl[linea].ETQ == ETQ){
             // hit++;
             printf("T: %d, Acierto de CACHE, ADDR %04X Label %X linea %02X palabra %02X DATO %02X\n", globaltime, hex, ETQ, linea, palabra, tbl[linea].Data[palabra]);
             
