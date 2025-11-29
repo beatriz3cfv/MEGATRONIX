@@ -116,7 +116,7 @@ void ParsearDireccion(unsigned int addr, int *ETQ, int *palabra, int *linea, int
     *linea = (addr >> 4) & 0x7; //0x7 -> 111, 3 bits; lo de lineaMem >> 4 'quita' los ultimos 4 bits (los q leimos para palabra), ahora lo q lee seran los nuevos ultimos bits -> linea
     *ETQ = (addr >> 7) & 0x1F; //0x1F -> 16 -> 1 1111, 5 bits
 
-    *bloque = (addr >> 4) & 0xFF; //el bloque será (creo) la etiqueta mas la linea
+    *bloque = (addr >> 4) & 0xFF; //el bloque será la etiqueta mas la linea
 }
 
 void VolcarCACHE(T_CACHE_LINE *tbl) {
