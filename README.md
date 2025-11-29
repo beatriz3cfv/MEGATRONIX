@@ -1,3 +1,3 @@
 # MEGATRONIX
 
-Beatriz Cejas-Fuentes y Marta Martín. uWu
+Beatriz Cejas-Fuentes y Marta Martín.
