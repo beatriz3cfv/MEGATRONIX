@@ -19,7 +19,7 @@ void TratarFallo(T_CACHE_LINE *tbl, char *MRAM, int ETQ, int linea, int bloque);
 // MAIN
 int main(){
     // Inicializar datos
-    int globaltime = 0, numfallos = 0, hit = 0, accesos = 0;
+    int globaltime = 0, numfallos = 0, accesos = 0;
     int ETQ = 0, bloque = 0, linea = 0, palabra = 0;
     int itexto = 0; // index de caracteres dentro del texto
     unsigned char Simul_RAM[TAM_RAM];
