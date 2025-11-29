@@ -53,15 +53,11 @@ int main(){
     while(fgets(lineaMem, sizeof(lineaMem), fTxt)){
         globaltime++;
         accesos++;
-        //printf("%s", lineaMem);
 
         hex = (unsigned long) strtol(lineaMem, NULL, 16);
         ParsearDireccion(hex, &ETQ, &palabra, &linea, &bloque);
-
-        //printf("direccion: %0X, etq: %d, linea: %d, palabra: %d, bloque: %d\n", hex, ETQ, linea, palabra, bloque);
         
         if(tbl[linea].ETQ == ETQ){
-            // hit++;
             printf("T: %d, Acierto de CACHE, ADDR %04X Label %X linea %02X palabra %02X DATO %02X\n", globaltime, hex, ETQ, linea, palabra, tbl[linea].Data[palabra]);
             
         } else {
@@ -79,13 +75,12 @@ int main(){
             texto[itexto++] = tbl[linea].Data[palabra];
             texto[itexto] = '\0';
         }
+
         VolcarCACHE(tbl);
         printf("\n");
     }
 
     fclose(fTxt);
-
-    // VolcarCACHE(tbl);
 
     sleep(1);
     printf("Accesos totales: %d; Fallos: %d; Tiempo medio: %.2f \n", accesos, numfallos, (float) globaltime/accesos);
